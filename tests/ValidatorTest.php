@@ -25,8 +25,8 @@ class ValidatorTest extends TestCase
     public function accountNumberProvider(): array
     {
         return [
-            ['123456789', false],
-            ['123456788', true],
+            ['123456789', true],
+            ['123456788', false],
         ];
     }
 }

@@ -16,6 +16,12 @@ class Validator
 
     public function getChecksum(string $accountNumber): int
     {
-        return array_sum(str_split($accountNumber)) % 11;
+        $checksum = 0;
+
+        for ($i = 1; $i <= 9; $i++) {
+            $checksum += $i * $accountNumber[-$i];
+        }
+
+        return $checksum % 11;
     }
 }

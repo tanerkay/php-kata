@@ -47,9 +47,9 @@ class BankOcrTest extends TestCase
                 
                 INPUT,
                 <<<OUTPUT
-                123456789 ERR
-                123456788
-                769847285 ERR
+                123456789
+                123456788 ERR
+                769847285
                 769847?85 ILL
                 OUTPUT,
             ],
