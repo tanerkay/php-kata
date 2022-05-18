@@ -2,7 +2,6 @@
 
 namespace Kata\Tests;
 
-use Kata\Parser;
 use Kata\Validator;
 use Kata\ValidatorException;
 use PHPUnit\Framework\TestCase;

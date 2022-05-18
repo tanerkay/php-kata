@@ -43,9 +43,6 @@ class Parser
         return $result;
     }
 
-    /**
-     * @throws ParserException
-     */
     public function matchSegment(string $segment): string
     {
         $mapping = [
@@ -61,7 +58,7 @@ class Parser
         ];
 
         if (! array_key_exists($segment, $mapping)) {
-            throw new ParserException('Invalid segment in entry.');
+            return '?';
         }
 
         return $mapping[$segment];
