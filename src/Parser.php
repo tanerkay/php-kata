@@ -37,12 +37,19 @@ class Parser
 
         for ($i = 0; $i < 9; $i++) {
             $segment = join('', array_map(fn ($line) => substr($line, 3 * $i, 3), $lines));
-            $result .= $this->matchSegment($segment);
+            try {
+                $result .= $this->matchSegment($segment);
+            } catch (ParserException) {
+                $result .= '?';
+            }
         }
 
         return $result;
     }
 
+    /**
+     * @throws ParserException
+     */
     public function matchSegment(string $segment): string
     {
         $mapping = [
@@ -58,7 +65,7 @@ class Parser
         ];
 
         if (! array_key_exists($segment, $mapping)) {
-            return '?';
+            throw new ParserException('Invalid segment in entry.');
         }
 
         return $mapping[$segment];
