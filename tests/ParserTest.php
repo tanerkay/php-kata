@@ -11,7 +11,7 @@ class ParserTest extends TestCase
      * @dataProvider entriesProvider
      * @throws \Kata\ParserException
      */
-    public function testValidSums(string $entry, string $expectedResult): void
+    public function testParse(string $entry, string $expectedResult): void
     {
         $this->assertSame(
             $expectedResult,
