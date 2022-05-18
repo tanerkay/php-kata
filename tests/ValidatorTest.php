@@ -10,14 +10,13 @@ class ValidatorTest extends TestCase
 {
     /**
      * @dataProvider accountNumberProvider
-     * @throws \Kata\ParserException
      */
     public function testAccountNumbers(string $accountNumber, bool $isValid): void
     {
         if ($isValid) {
-            $this->expectException(ValidatorException::class);
-        } else {
             $this->expectNotToPerformAssertions();
+        } else {
+            $this->expectException(ValidatorException::class);
         }
 
         (new Validator())->validateAccountNumber($accountNumber);
@@ -26,8 +25,8 @@ class ValidatorTest extends TestCase
     public function accountNumberProvider(): array
     {
         return [
-            ['123456789', true],
-            ['123456788', false],
+            ['123456789', false],
+            ['123456788', true],
         ];
     }
 }

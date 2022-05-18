@@ -28,7 +28,35 @@ class BankOcr
         // Simulate reading from a file
         $accountNumbers = $parser->parseDocument($document);
 
+        $lines = [];
+
+        foreach ($accountNumbers as $number) {
+            $status = $this->accountNumberStatus($number);
+            if ($status) {
+                $number .= " $status";
+            }
+            $lines[] = $number;
+        }
+
         // Simulate writing to a file (because we don't want to worry about file permissions)
-        $this->output = join("\n", $accountNumbers);
+        $this->output = join("\n", $lines);
+    }
+
+    public function accountNumberStatus(string $accountNumber): ?string
+    {
+        // Check for illegal characters
+        if (str_contains($accountNumber, '?')) {
+            return 'ILL';
+        }
+
+        // Check for validation errors
+        try {
+            // in the real world, this validator instance would be injected
+            (new Validator())->validateAccountNumber($accountNumber);
+        } catch (ValidatorException) {
+            return 'ERR';
+        }
+
+        return null;
     }
 }

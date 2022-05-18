@@ -11,7 +11,7 @@ class Parser
     {
         $document = trim($document, "\n");
 
-        $entries = str_split($document, 84);
+        $entries = str_split($document, 85);
 
         $results = [];
 
