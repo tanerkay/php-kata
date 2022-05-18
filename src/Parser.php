@@ -7,16 +7,15 @@ class Parser
     /**
      * @throws ParserException
      */
-    public function parseDocument(string $document): array
+    public function getEntries(string $document): array
     {
         $document = trim($document, "\n");
 
-        $entries = str_split($document, 85);
+        return str_split($document, 85);
 
         $results = [];
 
         foreach ($entries as $entry) {
-            $results[] = $this->parse($entry);
         }
 
         return $results;
@@ -52,6 +51,7 @@ class Parser
      */
     public function matchSegment(string $segment): string
     {
+        // not sure if this is uglier than using heredocs...
         $mapping = [
             '     |  |' => '1',
             ' _  _||_ ' => '2',

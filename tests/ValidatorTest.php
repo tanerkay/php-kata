@@ -13,12 +13,11 @@ class ValidatorTest extends TestCase
      */
     public function testAccountNumbers(string $accountNumber, bool $isValid): void
     {
-        if ($isValid) {
-            $this->expectNotToPerformAssertions();
-        } else {
+        if (! $isValid) {
             $this->expectException(ValidatorException::class);
         }
 
+        $this->assertSame($isValid, (new Validator())->isValid($accountNumber));
         (new Validator())->validateAccountNumber($accountNumber);
     }
 

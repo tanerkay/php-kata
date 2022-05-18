@@ -26,37 +26,98 @@ class BankOcr
         $parser = new Parser();
 
         // Simulate reading from a file
-        $accountNumbers = $parser->parseDocument($document);
+        $entries = $parser->getEntries($document);
 
         $lines = [];
 
-        foreach ($accountNumbers as $number) {
-            $status = $this->accountNumberStatus($number);
-            if ($status) {
-                $number .= " $status";
-            }
-            $lines[] = $number;
+        foreach ($entries as $entry) {
+            $lines[] = $this->accountNumberStatus($entry);
         }
 
         // Simulate writing to a file (because we don't want to worry about file permissions)
         $this->output = join("\n", $lines);
     }
 
-    public function accountNumberStatus(string $accountNumber): ?string
+    /**
+     * @throws ParserException
+     */
+    public function accountNumberStatus(string $entry): ?string
     {
+        $parser = new Parser();
+
+        $accountNumber = $parser->parse($entry);
+
+        $status = null;
+
         // Check for illegal characters
         if (str_contains($accountNumber, '?')) {
-            return 'ILL';
+            $status = 'ILL';
         }
 
         // Check for validation errors
-        try {
-            // in the real world, this validator instance would be injected
-            (new Validator())->validateAccountNumber($accountNumber);
-        } catch (ValidatorException) {
-            return 'ERR';
+        // in the real world, this validator instance would be injected
+        elseif (! (new Validator())->isValid($accountNumber)) {
+            $status = 'ERR';
         }
 
-        return null;
+        if ($status === 'ILL' || $status === 'ERR') {
+            try {
+                $accountNumber = $this->guessAccountNumber($entry);
+                $status = null;
+            } catch (AmbiguousValueException $exception) {
+                $options = "'" . join("', '", $exception->getMatches()) . "'";
+                $status = "AMB [$options]";
+            } catch (ValidatorException|ParserException) {
+                $status = 'ILL';
+            }
+        }
+
+        return $accountNumber . ($status ? " $status" : '');
+    }
+
+    /**
+     * @throws AmbiguousValueException
+     * @throws ParserException
+     * @throws ValidatorException
+     */
+    public function guessAccountNumber(string $entry): ?string
+    {
+        $parser = new Parser();
+        $validator = new Validator();
+
+        $matches = [];
+
+        for ($i = 0; $i < 83; $i++) {
+            $part = $entry[$i];
+
+            // Ignore the newline character
+            if ($part === "\n") {
+                continue;
+            }
+
+            $guesses = [];
+
+            if ($part === ' ') {
+                $guesses[] = substr_replace($entry, '_', $i, 1);
+                $guesses[] = substr_replace($entry, '|', $i, 1);
+            } else {
+                $guesses[] = substr_replace($entry, ' ', $i, 1);
+            }
+
+            foreach ($guesses as $guess) {
+                $guessedNumber = $parser->parse($guess);
+                if ($validator->isValid($guessedNumber)) {
+                    $matches[] = $guessedNumber;
+                }
+            }
+        }
+
+        if (count($matches) === 0) {
+            throw new ValidatorException('No valid matches found.');
+        } elseif (count($matches) >= 2) {
+            throw new AmbiguousValueException('Multiple matches found.', $matches);
+        }
+
+        return $matches[0];
     }
 }
