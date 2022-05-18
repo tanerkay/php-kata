@@ -12,13 +12,6 @@ class Parser
         $document = trim($document, "\n");
 
         return str_split($document, 85);
-
-        $results = [];
-
-        foreach ($entries as $entry) {
-        }
-
-        return $results;
     }
 
     /**
@@ -30,12 +23,14 @@ class Parser
             throw new ParserException('Invalid entry format.');
         }
 
-        $lines = explode("\n", $entry);
+        // Get non-empty lines in entry as array
+        $lines = array_filter(explode("\n", $entry));
 
         $result = '';
 
         for ($i = 0; $i < 9; $i++) {
-            $segment = join('', array_map(fn ($line) => substr($line, 3 * $i, 3), $lines));
+            // Collate the horizontal part of each line to form a segment
+            $segment = join("\n", array_map(fn ($line) => substr($line, 3 * $i, 3), $lines));
             try {
                 $result .= $this->matchSegment($segment);
             } catch (ParserException) {
@@ -51,17 +46,57 @@ class Parser
      */
     public function matchSegment(string $segment): string
     {
-        // not sure if this is uglier than using heredocs...
         $mapping = [
-            '     |  |' => '1',
-            ' _  _||_ ' => '2',
-            ' _  _| _|' => '3',
-            '   |_|  |' => '4',
-            ' _ |_  _|' => '5',
-            ' _ |_ |_|' => '6',
-            ' _   |  |' => '7',
-            ' _ |_||_|' => '8',
-            ' _ |_| _|' => '9',
+            <<<segment
+             _ 
+            | |
+            |_|
+            segment => '0',
+            <<<segment
+               
+              |
+              |
+            segment => '1',
+            <<<segment
+             _ 
+             _|
+            |_ 
+            segment => '2',
+            <<<segment
+             _ 
+             _|
+             _|
+            segment => '3',
+            <<<segment
+               
+            |_|
+              |
+            segment => '4',
+            <<<segment
+             _ 
+            |_ 
+             _|
+            segment => '5',
+            <<<segment
+             _ 
+            |_ 
+            |_|
+            segment => '6',
+            <<<segment
+             _ 
+              |
+              |
+            segment => '7',
+            <<<segment
+             _ 
+            |_|
+            |_|
+            segment => '8',
+            <<<segment
+             _ 
+            |_|
+             _|
+            segment => '9',
         ];
 
         if (! array_key_exists($segment, $mapping)) {
